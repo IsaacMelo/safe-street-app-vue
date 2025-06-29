@@ -15,5 +15,8 @@ export default defineNuxtConfig({
     '@nuxt/scripts',
     '@nuxt/test-utils',
     '@nuxt/ui'
+  ],
+  css: [
+    'leaflet/dist/leaflet.css'
   ]
 })
