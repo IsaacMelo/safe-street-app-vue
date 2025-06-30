@@ -1,10 +1,5 @@
 <template>
   <div class="app-wrapper">
-    <header class="app-header">
-      <button class="home-button" @click="goHome">🏠 Home</button>
-      <h1 class="app-title">SafeStreet</h1>
-    </header>
-
     <button @click="togglePopup" class="floating-button">
       <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" width="20" height="20">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -50,7 +45,7 @@ import '~/utils/leafletIconFix'
 
 
 const mapContainer = ref(null)
-const { token, login } = useAuth()
+const { token } = useAuth()
 const showPopup = ref(false)
 
 let map
@@ -76,7 +71,6 @@ const initMap = async () => {
 }
 
 onMounted(async () => {
-  if (!token.value) await login('fake@gmail.com', 'I12364')
   await initMap()
 })
 
@@ -121,8 +115,6 @@ const handleRoute = async ({ from, to }) => {
 }
 
 const showRiskAreas = async (lat, lng) => {
-  if (!token.value) return
-
   try {
     const url = `https://safe-street-api.onrender.com/api/riskareas?maxDistance=10000&lat=${lat}&lng=${lng}`
     const res = await fetch(url, {
@@ -219,7 +211,6 @@ const getRiskColor = (count) => {
 .map-container {
   height: 100vh;
   width: 100%;
-  margin-top: 56px;
 }
 
 .map-container {

@@ -1,11 +1,5 @@
 <template>
-  <div>
-    <ClientOnly>
-      <MapView />
-    </ClientOnly>
-  </div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
-
-<script setup>
-import MapView from '~/components/MapView.vue'
-</script>
