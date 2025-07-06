@@ -1,5 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  pages: true,
+  imports: {
+    autoImport: true
+  },
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
 
@@ -17,6 +21,7 @@ export default defineNuxtConfig({
     '@nuxt/ui'
   ],
   css: [
-    'leaflet/dist/leaflet.css'
+    'leaflet/dist/leaflet.css',
+    '~/assets/css/global.css'
   ]
 })

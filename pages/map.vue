@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h1>Página Inicial</h1>
     <ClientOnly>
       <MapView />
     </ClientOnly>
@@ -8,5 +7,6 @@
 </template>
 
 <script setup>
+definePageMeta({ layout: 'default' })
 import MapView from '~/components/MapView.vue'
 </script>
