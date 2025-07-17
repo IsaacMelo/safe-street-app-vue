@@ -1,25 +1,54 @@
 <template>
-  <div class="register-container">
-    <div class="register-box">
+  <div class="page-container full-height">
+    <div class="form-container">
       <h2>Cadastro</h2>
 
       <form @submit.prevent="handleRegister">
-        <label for="name">Nome</label>
-        <input v-model="name" type="text" id="name" placeholder="Seu nome" required />
+        <div class="form-group">
+          <label for="name">Nome</label>
+          <input 
+            id="name"
+            v-model="name" 
+            type="text" 
+            placeholder="Seu nome" 
+            required 
+            class="form-input"
+          />
+        </div>
 
-        <label for="email">Email</label>
-        <input v-model="email" type="email" id="email" placeholder="email@exemplo.com" required />
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input 
+            id="email"
+            v-model="email" 
+            type="email" 
+            placeholder="email@exemplo.com" 
+            required 
+            class="form-input"
+          />
+        </div>
 
-        <label for="senha">Senha</label>
-        <input v-model="senha" type="password" id="senha" placeholder="••••••••" required />
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <input 
+            id="senha"
+            v-model="senha" 
+            type="password" 
+            placeholder="••••••••" 
+            required 
+            class="form-input"
+          />
+        </div>
 
-        <button type="submit" class="btn-register">Cadastrar</button>
+        <button type="submit" class="btn btn-primary btn-full">Cadastrar</button>
 
         <p v-if="error" class="error-msg">{{ error }}</p>
         <p v-if="success" class="success-msg">{{ success }}</p>
       </form>
 
-      <NuxtLink to="/login" class="login-link">Já tem conta? Faça login</NuxtLink>
+      <div class="text-center mt-4">
+        <NuxtLink to="/login" class="link">Já tem conta? Faça login</NuxtLink>
+      </div>
     </div>
   </div>
 </template>
@@ -50,84 +79,3 @@ async function handleRegister() {
   }
 }
 </script>
-
-<style scoped>
-.register-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f8fafc;
-}
-
-.register-box {
-  background: #ffffff;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-}
-
-h2 {
-  margin-bottom: 24px;
-  text-align: center;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-input {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 1rem;
-}
-
-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px #bfdbfe;
-}
-
-.btn-register {
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-register:hover {
-  background-color: #2563eb;
-}
-
-.error-msg {
-  color: #dc2626;
-  font-size: 0.9rem;
-  margin-top: 6px;
-}
-
-.success-msg {
-  color: #16a34a;
-  font-size: 0.9rem;
-  margin-top: 6px;
-}
-
-.login-link {
-  margin-top: 20px;
-  display: block;
-  text-align: center;
-  font-size: 0.95rem;
-  color: #3b82f6;
-}
-</style>
