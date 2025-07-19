@@ -533,6 +533,8 @@ const countRiskAreasNearRoute = async (coordinates) => {
   height: 100vh;
   width: 100%;
   position: relative;
+  /* Garante que o mapa fique atrás dos controles */
+  z-index: 1;
 }
 
 /* Loading Overlay */
@@ -544,7 +546,7 @@ const countRiskAreasNearRoute = async (coordinates) => {
   height: 100%;
   background: rgba(15, 23, 42, 0.8);
   backdrop-filter: blur(4px);
-  z-index: 9999;
+  z-index: 200; /* Muito alto para loading, mas ainda abaixo de alertas críticos */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -573,9 +575,9 @@ const countRiskAreasNearRoute = async (coordinates) => {
 /* Map Controls Panel */
 .map-controls-panel {
   position: fixed;
-  top: 20px;
+  top: 85px; /* Ajustado para ficar abaixo do header (65px + 20px margin) */
   left: 20px;
-  z-index: 1000;
+  z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -640,9 +642,9 @@ const countRiskAreasNearRoute = async (coordinates) => {
 /* Custom Zoom Controls */
 .zoom-controls {
   position: fixed;
-  top: 20px;
+  top: 85px; /* Ajustado para ficar abaixo do header (65px + 20px margin) */
   right: 20px;
-  z-index: 1000;
+  z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -677,9 +679,9 @@ const countRiskAreasNearRoute = async (coordinates) => {
 /* GPS Button */
 .gps-button {
   position: fixed;
-  bottom: 20px;
+  bottom: 80px; /* Ajustado para ficar acima do footer */
   right: 20px;
-  z-index: 1000;
+  z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
   width: 56px;
   height: 56px;
   border: none;
@@ -719,9 +721,9 @@ const countRiskAreasNearRoute = async (coordinates) => {
 /* Risk Legend */
 .risk-legend {
   position: fixed;
-  bottom: 20px;
+  bottom: 80px; /* Ajustado para ficar acima do footer */
   left: 20px;
-  z-index: 1000;
+  z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   padding: 16px;
@@ -782,7 +784,7 @@ const countRiskAreasNearRoute = async (coordinates) => {
   height: 100%;
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(4px);
-  z-index: 2000;
+  z-index: 150; /* Alto o suficiente para ficar acima de tudo, mas abaixo de modais críticos */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -847,10 +849,10 @@ const countRiskAreasNearRoute = async (coordinates) => {
 /* Route Info Panel */
 .route-info-panel {
   position: fixed;
-  bottom: 20px;
+  bottom: 80px; /* Ajustado para ficar acima do footer */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   padding: 16px 20px;
@@ -1022,7 +1024,7 @@ const countRiskAreasNearRoute = async (coordinates) => {
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .map-controls-panel {
-    top: 10px;
+    top: 75px; /* Ajustado para mobile - header menor */
     left: 10px;
     gap: 6px;
   }
@@ -1039,7 +1041,7 @@ const countRiskAreasNearRoute = async (coordinates) => {
   }
   
   .zoom-controls {
-    top: 10px;
+    top: 75px; /* Ajustado para mobile - header menor */
     right: 10px;
   }
   
@@ -1049,21 +1051,21 @@ const countRiskAreasNearRoute = async (coordinates) => {
   }
   
   .gps-button {
-    bottom: 10px;
+    bottom: 70px; /* Ajustado para mobile - footer menor */
     right: 10px;
     width: 50px;
     height: 50px;
   }
   
   .risk-legend {
-    bottom: 10px;
+    bottom: 70px; /* Ajustado para mobile - footer menor */
     left: 10px;
     padding: 12px;
     min-width: 180px;
   }
   
   .route-info-panel {
-    bottom: 10px;
+    bottom: 70px; /* Ajustado para mobile - footer menor */
     left: 10px;
     right: 10px;
     transform: none;
