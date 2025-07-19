@@ -21,6 +21,24 @@
             placeholder="Digite o endereço de origem..."
             :class="{ 'has-value': fromLocation }"
           />
+          <!-- Current Location Button for Origin -->
+          <button 
+            @click="setOriginToCurrentLocation" 
+            class="current-location-btn"
+            type="button"
+            title="Usar localização atual como origem"
+            :disabled="isGettingLocation"
+          >
+            <svg v-if="!isGettingLocation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="2" x2="12" y2="6"/>
+              <line x1="12" y1="18" x2="12" y2="22"/>
+              <line x1="2" y1="12" x2="6" y2="12"/>
+              <line x1="18" y1="12" x2="22" y2="12"/>
+              <circle cx="12" cy="12" r="3" fill="currentColor"/>
+            </svg>
+            <div v-else class="mini-spinner"></div>
+          </button>
           <button 
             v-if="fromQuery && !fromLocation" 
             @click="clearInput('from')" 
@@ -165,6 +183,7 @@ const toLocation = ref(null)
 const activeField = ref(null)
 const isSearching = ref(false)
 const searchTimeout = ref(null)
+const isGettingLocation = ref(false)
 
 const { token } = useAuth()
 
@@ -300,6 +319,71 @@ const clear = () => {
 const useCurrentLocation = () => {
   emit('setFromCurrentLocation')
 }
+
+const setOriginToCurrentLocation = async () => {
+  if (isGettingLocation.value) return
+  
+  isGettingLocation.value = true
+  
+  try {
+    const position = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      })
+    })
+    
+    const coords = position.coords
+    const lat = coords.latitude
+    const lng = coords.longitude
+    
+    // Try to get the address from coordinates using reverse geocoding
+    try {
+      const response = await fetch(`https://safe-street-api.onrender.com/api/reverse-geocode?lat=${lat}&lng=${lng}`, {
+        headers: {
+          Authorization: `Bearer ${token.value}`
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        fromQuery.value = data.address_formatted || 'Localização Atual'
+      } else {
+        fromQuery.value = 'Localização Atual'
+      }
+    } catch (geocodeError) {
+      console.warn('Erro ao obter endereço:', geocodeError)
+      fromQuery.value = 'Localização Atual'
+    }
+    
+    // Set the location coordinates
+    fromLocation.value = {
+      lat: lat,
+      lng: lng
+    }
+    
+    // Clear suggestions
+    fromSuggestions.value = []
+    activeField.value = null
+    
+  } catch (error) {
+    console.error('Erro ao obter localização:', error)
+    let errorMessage = 'Não foi possível obter sua localização.'
+    
+    if (error.code === error.PERMISSION_DENIED) {
+      errorMessage = 'Permissão de localização negada. Verifique as configurações do navegador.'
+    } else if (error.code === error.POSITION_UNAVAILABLE) {
+      errorMessage = 'Localização não disponível.'
+    } else if (error.code === error.TIMEOUT) {
+      errorMessage = 'Tempo limite para obter localização excedido.'
+    }
+    
+    alert(errorMessage)
+  } finally {
+    isGettingLocation.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -363,14 +447,13 @@ const useCurrentLocation = () => {
 
 .input-wrapper input {
   width: 100%;
-  padding: 10px 16px 10px 36px;
+  padding: 12px 80px 12px 40px; /* Increased right padding for both buttons */
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 14px;
-  font-family: inherit;
+  background: white;
   transition: all 0.2s ease;
-  background: #f9fafb;
-  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .input-wrapper input:focus {
@@ -425,6 +508,49 @@ const useCurrentLocation = () => {
 .input-success svg {
   width: 14px;
   height: 14px;
+}
+
+.current-location-btn {
+  position: absolute;
+  right: 50px; /* Position with more space from clear button */
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #3b82f6; /* Primary color */
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.current-location-btn:hover:not(:disabled) {
+  background: #e0e7ff; /* Lighter blue on hover */
+  color: #2563eb; /* Darker blue on hover */
+}
+
+.current-location-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.current-location-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mini-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 .swap-container {
@@ -491,6 +617,11 @@ const useCurrentLocation = () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .suggestions li {
