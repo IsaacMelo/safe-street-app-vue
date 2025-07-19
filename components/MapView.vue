@@ -8,17 +8,29 @@
       </div>
     </div>
 
+    <!-- Fixed Route Search Panel - Google Maps Style -->
+    <div class="route-search-panel" :class="{ expanded: isRouteSearchExpanded }">
+      <div class="route-panel-header" @click="toggleRouteSearch">
+        <div class="route-panel-title">
+          <i class="fas fa-route"></i>
+          <span>Calcular Rota Segura</span>
+        </div>
+        <button class="expand-toggle" :class="{ rotated: isRouteSearchExpanded }">
+          <i class="fas fa-chevron-up"></i>
+        </button>
+      </div>
+      
+      <div class="route-panel-content" v-show="isRouteSearchExpanded">
+        <RouteSearch
+          @calculateRoute="handleRoute"
+          @clearRoute="clearRoute"
+          @setFromCurrentLocation="useUserLocation"
+        />
+      </div>
+    </div>
+
     <!-- Map Controls Panel -->
     <div class="map-controls-panel">
-      <!-- Route Button -->
-      <button @click="togglePopup" class="control-button primary" :class="{ active: showPopup }">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        <span>Rota</span>
-      </button>
-
       <!-- Risk Areas Toggle -->
       <button @click="toggleRiskAreas" class="control-button secondary" :class="{ active: showRiskAreas }">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -88,26 +100,6 @@
       </div>
     </div>
 
-    <!-- Route Search Popup -->
-    <div v-if="showPopup" class="popup-overlay" @click.self="closePopup">
-      <div class="popup-content">
-        <div class="popup-header">
-          <h3>Calcular Rota Segura</h3>
-          <button @click="closePopup" class="close-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-        <RouteSearch
-          @calculateRoute="handleRoute"
-          @clearRoute="clearRoute"
-          @setFromCurrentLocation="useUserLocation"
-        />
-      </div>
-    </div>
-
     <!-- Map Container -->
     <div ref="mapContainer" class="map-container"></div>
 
@@ -150,13 +142,13 @@ import '~/utils/leafletIconFix'
 
 const mapContainer = ref(null)
 const { token } = useAuth()
-const showPopup = ref(false)
 const showRiskAreas = ref(false)
 const isLoading = ref(false)
 const isLocating = ref(false)
 const loadingMessage = ref('')
 const riskAreasLoaded = ref(false)
 const routeInfo = ref(null)
+const isRouteSearchExpanded = ref(true) // Start expanded by default
 
 let map
 let routeLayer
@@ -181,12 +173,8 @@ const mapStyles = {
   }
 }
 
-const togglePopup = () => {
-  showPopup.value = !showPopup.value
-}
-
-const closePopup = () => {
-  showPopup.value = false
+const toggleRouteSearch = () => {
+  isRouteSearchExpanded.value = !isRouteSearchExpanded.value
 }
 
 const toggleRiskAreas = async () => {
@@ -333,7 +321,8 @@ const handleRoute = async ({ from, to }) => {
       riskCount
     }
     
-    showPopup.value = false
+    // Collapse route search panel after calculating route
+    isRouteSearchExpanded.value = false
     
   } catch (error) {
     console.error('Erro ao calcular rota:', error)
@@ -395,6 +384,9 @@ const clearRoute = () => {
   }
   clearRouteMarkers()
   routeInfo.value = null
+  
+  // Expand route search panel when clearing route
+  isRouteSearchExpanded.value = true
 }
 
 const clearRouteMarkers = () => {
@@ -572,11 +564,94 @@ const countRiskAreasNearRoute = async (coordinates) => {
   100% { transform: rotate(360deg); }
 }
 
-/* Map Controls Panel */
+/* Fixed Route Search Panel - Google Maps Style */
+.route-search-panel {
+  position: fixed;
+  top: 85px; /* Below header */
+  left: 20px;
+  right: 20px;
+  max-width: 400px;
+  z-index: 60; /* Above map controls */
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.route-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.route-panel-header:hover {
+  background: #f1f5f9;
+}
+
+.route-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.route-panel-title i {
+  color: #3b82f6;
+  font-size: 1rem;
+}
+
+.expand-toggle {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.expand-toggle:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.expand-toggle.rotated {
+  transform: rotate(180deg);
+}
+
+.expand-toggle i {
+  font-size: 0.875rem;
+}
+
+.route-panel-content {
+  padding: 0;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Map Controls Panel - Repositioned */
 .map-controls-panel {
   position: fixed;
   top: 85px; /* Ajustado para ficar abaixo do header (65px + 20px margin) */
-  left: 20px;
+  right: 20px;
   z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
   display: flex;
   flex-direction: column;
@@ -602,18 +677,6 @@ const countRiskAreasNearRoute = async (coordinates) => {
 .control-button svg {
   width: 18px;
   height: 18px;
-}
-
-.control-button.primary {
-  background: rgba(59, 130, 246, 0.9);
-  color: white;
-}
-
-.control-button.primary:hover,
-.control-button.primary.active {
-  background: rgba(37, 99, 235, 0.95);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .control-button.secondary {
@@ -642,7 +705,7 @@ const countRiskAreasNearRoute = async (coordinates) => {
 /* Custom Zoom Controls */
 .zoom-controls {
   position: fixed;
-  top: 85px; /* Ajustado para ficar abaixo do header (65px + 20px margin) */
+  bottom: 200px; /* Moved up to avoid conflict with route panel */
   right: 20px;
   z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
   display: flex;
@@ -679,7 +742,7 @@ const countRiskAreasNearRoute = async (coordinates) => {
 /* GPS Button */
 .gps-button {
   position: fixed;
-  bottom: 80px; /* Ajustado para ficar acima do footer */
+  bottom: 130px; /* Adjusted to be above route info panel */
   right: 20px;
   z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
   width: 56px;
@@ -775,77 +838,6 @@ const countRiskAreasNearRoute = async (coordinates) => {
   border-color: #059669;
 }
 
-/* Popup Styles */
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: 150; /* Alto o suficiente para ficar acima de tudo, mas abaixo de modais críticos */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.popup-content {
-  background: white;
-  padding: 24px;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.3s ease;
-  position: relative;
-}
-
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.popup-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.popup-header h3 {
-  margin: 0;
-  color: #1f2937;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.close-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.close-btn svg {
-  width: 20px;
-  height: 20px;
-}
-
 /* Route Info Panel */
 .route-info-panel {
   position: fixed;
@@ -921,6 +913,11 @@ const countRiskAreasNearRoute = async (coordinates) => {
 
 .stat-value.risk-count {
   color: #dc2626;
+}
+
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
 }
 
 /* Custom Markers */
@@ -1023,9 +1020,16 @@ const countRiskAreasNearRoute = async (coordinates) => {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  .route-search-panel {
+    top: 75px; /* Header mobile menor */
+    left: 10px;
+    right: 10px;
+    max-width: none;
+  }
+  
   .map-controls-panel {
     top: 75px; /* Ajustado para mobile - header menor */
-    left: 10px;
+    right: 10px;
     gap: 6px;
   }
   
@@ -1041,7 +1045,7 @@ const countRiskAreasNearRoute = async (coordinates) => {
   }
   
   .zoom-controls {
-    top: 75px; /* Ajustado para mobile - header menor */
+    bottom: 160px;
     right: 10px;
   }
   
@@ -1051,7 +1055,7 @@ const countRiskAreasNearRoute = async (coordinates) => {
   }
   
   .gps-button {
-    bottom: 70px; /* Ajustado para mobile - footer menor */
+    bottom: 90px;
     right: 10px;
     width: 50px;
     height: 50px;
@@ -1076,18 +1080,19 @@ const countRiskAreasNearRoute = async (coordinates) => {
     flex-direction: column;
     gap: 8px;
   }
-  
-  .popup-content {
-    width: 95%;
-    padding: 20px;
-  }
 }
 
 @media (max-width: 480px) {
+  .route-search-panel {
+    left: 5px;
+    right: 5px;
+  }
+  
   .map-controls-panel {
     flex-direction: row;
     flex-wrap: wrap;
     max-width: calc(100vw - 80px);
+    top: 70px;
   }
   
   .control-button {
@@ -1102,6 +1107,14 @@ const countRiskAreasNearRoute = async (coordinates) => {
   
   .risk-legend {
     display: none;
+  }
+  
+  .route-panel-title span {
+    display: none;
+  }
+  
+  .route-panel-header {
+    padding: 12px 16px;
   }
 }
 </style>

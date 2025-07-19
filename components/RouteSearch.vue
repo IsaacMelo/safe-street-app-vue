@@ -11,6 +11,7 @@
           Origem
         </label>
         <div class="input-wrapper">
+          <i class="fas fa-circle input-icon origin-icon"></i>
           <input 
             id="origin"
             v-model="fromQuery" 
@@ -69,6 +70,7 @@
           Destino
         </label>
         <div class="input-wrapper">
+          <i class="fas fa-map-marker-alt input-icon destination-icon"></i>
           <input 
             id="destination"
             v-model="toQuery" 
@@ -109,35 +111,35 @@
       </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <button @click="useCurrentLocation" class="quick-action-btn" type="button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="2" x2="12" y2="6"/>
-          <line x1="12" y1="18" x2="12" y2="22"/>
-          <line x1="2" y1="12" x2="6" y2="12"/>
-          <line x1="18" y1="12" x2="22" y2="12"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-        <span>Usar Minha Localização</span>
-      </button>
-    </div>
-
     <!-- Action Buttons -->
     <div class="action-buttons">
       <button @click="calculate" class="primary-btn" :disabled="!canCalculate" type="button">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 11l3 3 8-8"/>
         </svg>
-        <span>Calcular Rota Segura</span>
+        <span>Calcular Rota</span>
       </button>
-      <button @click="clear" class="secondary-btn" type="button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-        </svg>
-        <span>Limpar</span>
-      </button>
+      
+      <div class="secondary-actions">
+        <button @click="useCurrentLocation" class="secondary-btn" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="2" x2="12" y2="6"/>
+            <line x1="12" y1="18" x2="12" y2="22"/>
+            <line x1="2" y1="12" x2="6" y2="12"/>
+            <line x1="18" y1="12" x2="22" y2="12"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span>Usar Localização</span>
+        </button>
+        
+        <button @click="clear" class="secondary-btn clear-btn" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          </svg>
+          <span>Limpar</span>
+        </button>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -304,14 +306,16 @@ const useCurrentLocation = () => {
 .route-search {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 20px;
+  background: white;
 }
 
 .search-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .input-group {
@@ -321,17 +325,17 @@ const useCurrentLocation = () => {
 .input-group label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 600;
-  color: #374151;
-  margin-bottom: 8px;
+  color: #6b7280;
+  margin-bottom: 6px;
 }
 
 .input-group label svg {
-  width: 16px;
-  height: 16px;
-  color: #6b7280;
+  width: 12px;
+  height: 12px;
+  color: #9ca3af;
 }
 
 .input-wrapper {
@@ -340,21 +344,37 @@ const useCurrentLocation = () => {
   align-items: center;
 }
 
+.input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  z-index: 1;
+}
+
+.origin-icon {
+  color: #059669;
+}
+
+.destination-icon {
+  color: #dc2626;
+}
+
 .input-wrapper input {
   width: 100%;
-  padding: 12px 16px;
-  padding-right: 48px;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  background: #f9fafb;
-  color: #111827;
+  padding: 10px 16px 10px 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
   transition: all 0.2s ease;
-  outline: none;
+  background: #f9fafb;
+  box-sizing: border-box;
 }
 
 .input-wrapper input:focus {
+  outline: none;
   border-color: #3b82f6;
   background: white;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -367,55 +387,56 @@ const useCurrentLocation = () => {
 
 .input-wrapper input::placeholder {
   color: #9ca3af;
+  font-size: 13px;
 }
 
 .clear-input-btn {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #6b7280;
+  color: #9ca3af;
   cursor: pointer;
-  padding: 4px;
+  padding: 2px;
   border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 .clear-input-btn:hover {
-  color: #374151;
+  color: #6b7280;
   background: #f3f4f6;
 }
 
 .clear-input-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 .input-success {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   color: #10b981;
 }
 
 .input-success svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 .swap-container {
   display: flex;
   justify-content: center;
-  margin: -8px 0;
+  margin: -4px 0;
 }
 
 .swap-btn {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #e5e7eb;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
   background: white;
   border-radius: 50%;
   cursor: pointer;
@@ -430,6 +451,7 @@ const useCurrentLocation = () => {
   border-color: #3b82f6;
   color: #3b82f6;
   transform: rotate(180deg);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .swap-btn:disabled {
@@ -438,8 +460,8 @@ const useCurrentLocation = () => {
 }
 
 .swap-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 .suggestions {
@@ -448,13 +470,13 @@ const useCurrentLocation = () => {
   left: 0;
   right: 0;
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   list-style: none;
   padding: 0;
-  margin: 4px 0 0 0;
-  max-height: 200px;
+  margin: 2px 0 0 0;
+  max-height: 160px;
   overflow-y: auto;
   z-index: 1000;
   animation: slideDown 0.2s ease;
@@ -463,7 +485,7 @@ const useCurrentLocation = () => {
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-5px);
   }
   to {
     opacity: 1;
@@ -472,12 +494,12 @@ const useCurrentLocation = () => {
 }
 
 .suggestions li {
-  padding: 12px 16px;
+  padding: 10px 12px;
   cursor: pointer;
   border-bottom: 1px solid #f3f4f6;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   transition: background-color 0.2s ease;
 }
 
@@ -490,65 +512,39 @@ const useCurrentLocation = () => {
 }
 
 .suggestion-icon {
-  color: #6b7280;
+  color: #9ca3af;
   flex-shrink: 0;
 }
 
 .suggestion-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 .suggestion-text {
-  font-size: 14px;
+  font-size: 13px;
   color: #374151;
   line-height: 1.4;
-}
-
-.quick-actions {
-  display: flex;
-  justify-content: center;
-}
-
-.quick-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: 1px solid #e5e7eb;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #6b7280;
-  transition: all 0.2s ease;
-}
-
-.quick-action-btn:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
-}
-
-.quick-action-btn svg {
-  width: 16px;
-  height: 16px;
 }
 
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 16px;
 }
 
-.primary-btn,
-.secondary-btn {
+.primary-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 20px;
+  padding: 12px 20px;
+  background: #3b82f6;
+  color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -556,49 +552,74 @@ const useCurrentLocation = () => {
   font-family: inherit;
 }
 
-.primary-btn {
-  background: #3b82f6;
-  color: white;
-}
-
 .primary-btn:hover:not(:disabled) {
   background: #2563eb;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .primary-btn:disabled {
-  background: #9ca3af;
+  background: #d1d5db;
+  color: #9ca3af;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
+.primary-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.secondary-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .secondary-btn {
-  background: #f3f4f6;
-  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  color: #6b7280;
   border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  flex: 1;
 }
 
 .secondary-btn:hover {
-  background: #e5e7eb;
-  transform: translateY(-1px);
+  background: #f1f5f9;
+  color: #374151;
+  border-color: #d1d5db;
 }
 
-.primary-btn svg,
+.secondary-btn.clear-btn:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
 .secondary-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
 }
 
 .loading-state {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px;
   color: #6b7280;
-  font-size: 14px;
+  font-size: 13px;
+  border-top: 1px solid #f3f4f6;
 }
 
 .loading-spinner {
@@ -608,8 +629,8 @@ const useCurrentLocation = () => {
 }
 
 .spinner {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border: 2px solid #e5e7eb;
   border-top: 2px solid #3b82f6;
   border-radius: 50%;
@@ -624,45 +645,44 @@ const useCurrentLocation = () => {
 /* Mobile Responsive */
 @media (max-width: 480px) {
   .route-search {
-    gap: 16px;
+    padding: 16px;
+    gap: 14px;
   }
   
   .search-form {
-    gap: 12px;
-  }
-  
-  .input-wrapper input {
-    padding: 10px 14px;
-    padding-right: 44px;
-    font-size: 13px;
-  }
-  
-  .swap-btn {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .swap-btn svg {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .action-buttons {
     gap: 10px;
   }
   
-  .primary-btn,
-  .secondary-btn {
-    padding: 12px 16px;
+  .input-wrapper input {
+    padding: 9px 14px 9px 32px;
     font-size: 13px;
   }
   
-  .quick-action-btn {
-    padding: 8px 12px;
-    font-size: 12px;
+  .input-icon {
+    left: 10px;
+    font-size: 13px;
   }
   
-  .quick-action-btn svg {
+  .primary-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  .secondary-btn {
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+  
+  .secondary-btn span {
+    display: none;
+  }
+  
+  .swap-btn {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .swap-btn svg {
     width: 14px;
     height: 14px;
   }
