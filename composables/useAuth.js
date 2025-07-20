@@ -20,10 +20,15 @@ export const useAuth = () => {
     return data.token
   }
 
-  const logout = () => {
+  const logout = async () => {
     token.value = ''
-    role.value = null
-    router.push('/tutorial')
+    try {
+      await router.push('/tutorial')
+    } catch (error) {
+      console.error('Erro ao redirecionar após logout:', error)
+      // Fallback para navegação
+      window.location.href = '/tutorial'
+    }
   }
 
   const role = computed(() => {

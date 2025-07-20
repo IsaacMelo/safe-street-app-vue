@@ -32,7 +32,7 @@
     <!-- Map Controls Panel -->
     <div class="map-controls-panel">
       <!-- Risk Areas Toggle -->
-      <button @click="toggleRiskAreas" class="control-button secondary" :class="{ active: showRiskAreas }">
+      <button @click="toggleRiskAreas" class="control-button secondary" :class="{ active: showRiskAreas }" title="Exibir áreas de risco">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
           <line x1="12" y1="9" x2="12" y2="13"/>
@@ -42,31 +42,35 @@
       </button>
 
       <!-- Map Style Toggle -->
-      <button @click="toggleMapStyle" class="control-button tertiary">
+      <button @click="toggleMapStyle" class="control-button tertiary" title="Alternar estilo do mapa">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          <path d="M3 6l9-3 9 3v12l-9 3-9-3V6z"/>
+          <path d="M9 3v18"/>
+          <path d="M15 3v18"/>
         </svg>
         <span>Estilo</span>
       </button>
-    </div>
 
-    <!-- Custom Zoom Controls -->
-    <div class="zoom-controls">
-      <button @click="zoomIn" class="zoom-button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35"/>
-          <line x1="11" y1="8" x2="11" y2="14"/>
-          <line x1="8" y1="11" x2="14" y2="11"/>
-        </svg>
-      </button>
-      <button @click="zoomOut" class="zoom-button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35"/>
-          <line x1="8" y1="11" x2="14" y2="11"/>
-        </svg>
-      </button>
+      <!-- Zoom Group -->
+      <div class="zoom-group">
+        <button @click="zoomIn" class="control-button zoom-in" title="Aproximar">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+            <line x1="11" y1="8" x2="11" y2="14"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+          <span>Zoom +</span>
+        </button>
+        <button @click="zoomOut" class="control-button zoom-out" title="Afastar">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+          <span>Zoom -</span>
+        </button>
+      </div>
     </div>
 
     <!-- GPS Location Button -->
@@ -107,7 +111,7 @@
     <div v-if="routeInfo" class="route-info-panel">
       <div class="route-info-header">
         <h4>Informações da Rota</h4>
-        <button @click="clearRoute" class="clear-route-btn">
+        <button @click="closeRouteInfo" class="clear-route-btn" title="Fechar informações">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
@@ -128,12 +132,22 @@
           <span class="stat-value risk-count">{{ routeInfo.riskCount }}</span>
         </div>
       </div>
+      <div class="route-actions">
+        <button @click="clearRoute" class="clear-route-action-btn" title="Limpar rota">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          Limpar Rota
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import RouteSearch from '~/components/RouteSearch.vue'
@@ -148,7 +162,7 @@ const isLocating = ref(false)
 const loadingMessage = ref('')
 const riskAreasLoaded = ref(false)
 const routeInfo = ref(null)
-const isRouteSearchExpanded = ref(true) // Start expanded by default
+const isRouteSearchExpanded = ref(window.innerWidth > 768) // Start expanded only on desktop
 
 let map
 let routeLayer
@@ -257,6 +271,20 @@ const initMap = async () => {
 
 onMounted(async () => {
   await initMap()
+  
+  // Adjust route panel state based on screen size
+  const handleResize = () => {
+    if (window.innerWidth <= 768 && isRouteSearchExpanded.value) {
+      isRouteSearchExpanded.value = false
+    }
+  }
+  
+  window.addEventListener('resize', handleResize)
+  
+  // Cleanup
+  onUnmounted(() => {
+    window.removeEventListener('resize', handleResize)
+  })
 })
 
 const handleRoute = async ({ from, to }) => {
@@ -387,6 +415,11 @@ const clearRoute = () => {
   
   // Expand route search panel when clearing route
   isRouteSearchExpanded.value = true
+}
+
+const closeRouteInfo = () => {
+  // Apenas fecha o painel de informações, mantém a rota no mapa
+  routeInfo.value = null
 }
 
 const clearRouteMarkers = () => {
@@ -571,7 +604,7 @@ const countRiskAreasNearRoute = async (coordinates) => {
   left: 20px;
   right: 20px;
   max-width: 400px;
-  z-index: 60; /* Above map controls */
+  z-index: 40; /* Below map controls to avoid overlap */
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -647,36 +680,76 @@ const countRiskAreasNearRoute = async (coordinates) => {
   }
 }
 
-/* Map Controls Panel - Repositioned */
+/* Map Controls Panel - Unificado para Desktop e Mobile */
 .map-controls-panel {
   position: fixed;
-  top: 85px; /* Ajustado para ficar abaixo do header (65px + 20px margin) */
-  right: 20px;
-  z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
+  bottom: 80px;
+  right: 10px;
+  z-index: 70;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  background: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.zoom-group {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.zoom-group .control-button {
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  border-bottom: 1px solid #e5e7eb;
+  background: rgba(255,255,255,0.95);
+  transition: background 0.2s;
+}
+
+.zoom-group .control-button:first-child {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.zoom-group .control-button:last-child {
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  border-bottom: none;
+}
+
+.zoom-group .control-button:active {
+  background: #f3f4f6;
 }
 
 .control-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  justify-content: center;
+  font-size: 12px;
+  min-width: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  min-width: 120px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.control-button span {
+  display: none;
 }
 
 .control-button svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .control-button.secondary {
@@ -692,14 +765,47 @@ const countRiskAreasNearRoute = async (coordinates) => {
 }
 
 .control-button.tertiary {
-  background: rgba(107, 114, 128, 0.9);
-  color: white;
+  background: #fff;
+  color: #222;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.3s;
+}
+
+.control-button.tertiary svg {
+  color: #222;
+  transition: color 0.2s;
 }
 
 .control-button.tertiary:hover {
-  background: rgba(75, 85, 99, 0.95);
+  background: #222;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(34,34,34,0.2);
+}
+
+.control-button.tertiary:hover svg {
+  color: #fff;
+}
+
+.control-button.zoom-in {
+  background: rgba(255, 255, 255, 0.95);
+  color: #374151;
+}
+
+.control-button.zoom-in:hover {
+  background: rgba(255, 255, 255, 1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.control-button.zoom-out {
+  background: rgba(255, 255, 255, 0.95);
+  color: #374151;
+}
+
+.control-button.zoom-out:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Custom Zoom Controls */
@@ -742,43 +848,47 @@ const countRiskAreasNearRoute = async (coordinates) => {
 /* GPS Button */
 .gps-button {
   position: fixed;
-  bottom: 130px; /* Adjusted to be above route info panel */
-  right: 20px;
-  z-index: 50; /* Reduzido para ficar abaixo do header (z-index: 100) */
-  width: 56px;
-  height: 56px;
-  border: none;
-  background: rgba(59, 130, 246, 0.95);
-  color: white;
+  bottom: 20px;
+  right: 10px;
+  width: 48px;
+  height: 48px;
+  z-index: 70;
+  background: #fff;
+  color: #222;
   border-radius: 50%;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+  backdrop-filter: blur(10px);
+}
+
+.gps-button svg {
+  width: 20px;
+  height: 20px;
+  color: #222;
+  transition: color 0.2s;
 }
 
 .gps-button:hover {
-  background: rgba(37, 99, 235, 0.95);
-  transform: scale(1.1);
-  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.6);
+  background: #222;
+}
+
+.gps-button:hover svg {
+  color: #fff;
 }
 
 .gps-button.active {
-  background: rgba(16, 185, 129, 0.95);
+  background: #222;
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
-
-.gps-button svg {
-  width: 24px;
-  height: 24px;
+  0% { box-shadow: 0 0 0 0 rgba(34,34,34,0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(34,34,34,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,34,34,0); }
 }
 
 /* Risk Legend */
@@ -915,6 +1025,38 @@ const countRiskAreasNearRoute = async (coordinates) => {
   color: #dc2626;
 }
 
+.route-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.clear-route-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.clear-route-action-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.clear-route-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
 @keyframes slideUp {
   from { transform: translateX(-50%) translateY(20px); opacity: 0; }
   to { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -1027,82 +1169,25 @@ const countRiskAreasNearRoute = async (coordinates) => {
     max-width: none;
   }
   
-  .map-controls-panel {
-    top: 75px; /* Ajustado para mobile - header menor */
-    right: 10px;
-    gap: 6px;
-  }
-  
-  .control-button {
-    padding: 10px 12px;
-    font-size: 12px;
-    min-width: 100px;
-  }
-  
-  .control-button svg {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .zoom-controls {
-    bottom: 160px;
-    right: 10px;
-  }
-  
-  .zoom-button {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .gps-button {
-    bottom: 90px;
-    right: 10px;
-    width: 50px;
-    height: 50px;
-  }
-  
-  .risk-legend {
-    bottom: 70px; /* Ajustado para mobile - footer menor */
-    left: 10px;
-    padding: 12px;
-    min-width: 180px;
-  }
-  
-  .route-info-panel {
-    bottom: 70px; /* Ajustado para mobile - footer menor */
-    left: 10px;
-    right: 10px;
-    transform: none;
-    min-width: auto;
-  }
-  
-  .route-stats {
-    flex-direction: column;
-    gap: 8px;
-  }
+  /* Remover media queries que diferenciavam desktop/mobile para controles do mapa e GPS */
 }
 
 @media (max-width: 480px) {
   .route-search-panel {
     left: 5px;
     right: 5px;
+    z-index: 40; /* Keep below controls */
   }
   
+  /* Manter a mesma estrutura de controles em telas pequenas */
   .map-controls-panel {
-    flex-direction: row;
-    flex-wrap: wrap;
-    max-width: calc(100vw - 80px);
-    top: 70px;
+    bottom: 80px;
+    right: 5px;
   }
   
-  .control-button {
-    flex: 1;
-    min-width: 80px;
-    padding: 8px;
-  }
-  
-  .control-button span {
-    display: none;
+  .gps-button {
+    bottom: 20px;
+    right: 5px;
   }
   
   .risk-legend {

@@ -19,6 +19,7 @@ const { logout, isLoggedIn, role } = useAuth()
 
 const darkMode = ref(false)
 const mobileMenuOpen = ref(false)
+const isLoggingOut = ref(false)
 
 function toggleDarkMode() {
   darkMode.value = !darkMode.value
@@ -41,6 +42,16 @@ function closeMobileMenu() {
   document.body.style.overflow = ''
 }
 
+async function handleLogout() {
+  isLoggingOut.value = true
+  closeMobileMenu()
+  try {
+    await logout()
+  } finally {
+    isLoggingOut.value = false
+  }
+}
+
 onMounted(() => {
   darkMode.value = localStorage.getItem('darkMode') === 'true'
   if (darkMode.value) document.body.classList.add('dark-mode')
@@ -48,6 +59,13 @@ onMounted(() => {
   // Close mobile menu on window resize
   window.addEventListener('resize', () => {
     if (window.innerWidth > 768) {
+      closeMobileMenu()
+    }
+  })
+
+  // Close mobile menu on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileMenuOpen.value) {
       closeMobileMenu()
     }
   })
@@ -206,11 +224,13 @@ onMounted(() => {
 
         <button
           v-if="isLoggedIn"
-          @click="logout; closeMobileMenu()"
+          @click="handleLogout"
           class="mobile-action-btn logout"
+          :disabled="isLoggingOut"
         >
-          <i class="fas fa-sign-out-alt"></i>
-          <span>Logout</span>
+          <i v-if="isLoggingOut" class="fas fa-spinner fa-spin"></i>
+          <i v-else class="fas fa-sign-out-alt"></i>
+          <span>{{ isLoggingOut ? 'Saindo...' : 'Logout' }}</span>
         </button>
 
         <NuxtLink
@@ -218,6 +238,7 @@ onMounted(() => {
           to="/login"
           class="mobile-action-btn login"
           @click="closeMobileMenu"
+          :class="{ 'disabled': isLoggingOut }"
         >
           <i class="fas fa-sign-in-alt"></i>
           <span>Login</span>
@@ -487,9 +508,10 @@ onMounted(() => {
   height: 100vh;
   background: white;
   z-index: 99;
-  transition: right 0.3s ease;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-nav.active {
@@ -602,10 +624,32 @@ onMounted(() => {
   text-decoration: none;
   transition: all 0.3s ease;
   margin-bottom: 0.5rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
 }
 
-.mobile-action-btn:hover {
+.mobile-action-btn:hover,
+.mobile-action-btn:active {
   background: #f3f4f6;
+  transform: translateY(1px);
+}
+
+.mobile-action-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.mobile-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.mobile-action-btn:disabled:hover,
+.mobile-action-btn:disabled:active {
+  background: white;
+  transform: none;
 }
 
 .mobile-action-btn.logout {
@@ -613,8 +657,10 @@ onMounted(() => {
   border-color: #fecaca;
 }
 
-.mobile-action-btn.logout:hover {
+.mobile-action-btn.logout:hover,
+.mobile-action-btn.logout:active {
   background: #fef2f2;
+  border-color: #fca5a5;
 }
 
 .mobile-action-btn.login {
@@ -622,8 +668,15 @@ onMounted(() => {
   border-color: #dbeafe;
 }
 
-.mobile-action-btn.login:hover {
+.mobile-action-btn.login:hover,
+.mobile-action-btn.login:active {
   background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.mobile-action-btn.disabled {
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 /* Main Content */
@@ -853,10 +906,28 @@ onMounted(() => {
   .footer-content {
     padding: 1rem 0;
   }
+
+  .mobile-action-btn {
+    padding: 1rem;
+    font-size: 1rem;
+    min-height: 48px;
+  }
+
+  .mobile-action-btn i {
+    font-size: 1.1rem;
+  }
 }
 
 /* Prevent scroll when mobile menu is open */
 body.mobile-menu-open {
   overflow: hidden;
+}
+
+/* Mobile button press feedback */
+@media (hover: none) and (pointer: coarse) {
+  .mobile-action-btn:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
 }
 </style>
